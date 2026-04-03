@@ -19,3 +19,7 @@ variable "common_tags" {
 variable "zone_name" {
     default = "daws.info"
 }
+
+variable "app_version" {
+  
+}
