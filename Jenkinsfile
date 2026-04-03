@@ -1,0 +1,76 @@
+pipeline {
+    agent {
+        label 'agent-1'
+    }
+    options {
+        timeout (time: 30, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        ansiColor('xterm')
+    }
+    parameters {
+        string(name:'appVersion', defaultValue: '1.0.0', description: 'What is the application version?')
+    }
+    environment{
+        appVersion = ''
+        nexusUrl = "54.198.30.190:8081"
+    }
+    stages {
+        stage ("read the version"){
+            steps {
+                script {
+                    echo "Application version: ${params.appVersion}"               
+                }
+            }
+        }
+        stage ("init") {
+            steps {
+                sh """
+                    cd terraform
+                    terraform init
+                """
+            }
+        }
+        stage ('plan') {
+            steps {
+                sh """
+                Version}.zip
+                
+                """
+            }
+        }
+        stage ('nexus') {
+            steps {
+                script {
+                    nexusArtifactUploader(
+                        nexusVersion: 'nexus3',
+                        protocol: 'http',
+                        nexusUrl: "${nexusUrl}",
+                        groupId: 'com.expense',
+                        version: "${appVersion}",
+                        repository: "backend",
+                        credentialsId: 'nexus_auth',
+                        artifacts: [
+                            [artifactId: "backend",
+                            classifier: '', 
+                            file: "backend-" + "${appVersion}" + '.zip' , 
+                            type: 'zip']
+                        ]
+                    )
+                }
+            }
+        }      
+    }
+    post {
+        always {
+            echo 'I will always say Hello again!'
+            deleteDir()
+        }
+        success {
+            echo 'I will run when pipeline is success'
+        }
+        failure {
+            echo 'I will run when pipeline is failure'
+        }
+    }
+}
+
