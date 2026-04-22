@@ -32,12 +32,27 @@ resource "null_resource" "backend" {
         destination = "/tmp/${var.common_tags.component}.sh"
     }
 
+    # provisioner "remote-exec" {
+        # inline = [
+            # "chmod +x /tmp/${var.common_tags.component}.sh",
+            # "sudo bash /tmp/${var.common_tags.component}.sh ${var.common_tags.component} ${var.environment} ${var.app_version}"
+        # ]
+    # }
+
     provisioner "remote-exec" {
-        inline = [
-            "chmod +x /tmp/${var.common_tags.component}.sh",
-            "sudo bash /tmp/${var.common_tags.component}.sh ${var.common_tags.component} ${var.environment} ${var.app_version}"
-        ]
-    }
+    inline = [
+        # 1. Create the vault password file so Ansible can decrypt y
+        "echo 'ExpenseApp1' > /tmp/vault_pass.txt", 
+        "chmod 400 /tmp/vault_pass.txt",
+        # 2. Make the script executable
+        "chmod +x /tmp/${var.common_tags.component}.sh",
+        # 3. Export the path so Ansible automatically finds the pass
+        "export ANSIBLE_VAULT_PASSWORD_FILE=/tmp/vault_pass.txt",
+        # 4. Run the script with sudo -E to preserve the environment
+        "sudo -E bash /tmp/${var.common_tags.component}.sh ${var.common_tags.component} ${var.environment} ${var.app_version}"
+    ]
+
+
 }
   
 resource "aws_ec2_instance_state" "backend"  {
