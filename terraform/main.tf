@@ -51,7 +51,7 @@ resource "null_resource" "backend" {
         # 4. Run the script with sudo -E to preserve the environment
         "sudo -E bash /tmp/${var.common_tags.component}.sh ${var.common_tags.component} ${var.environment} ${var.app_version}"
     ]
-
+    }
 
 }
   
