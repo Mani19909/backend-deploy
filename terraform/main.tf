@@ -41,17 +41,17 @@ resource "null_resource" "backend" {
 
     provisioner "remote-exec" {
         inline = [
-          # Create vault file as root
-         "echo 'ExpenseApp1' | sudo tee /tmp/vault_pass.txt",
-         "sudo chmod 600 /tmp/vault_pass.txt",
+         # 1. Create the vault password file so Ansible can decrypt your secrets
+         "echo 'ExpenseApp1' > /tmp/vault_pass.txt", 
+         "chmod 400 /tmp/vault_pass.txt",
 
-         # Make script executable
+         # 2. Make the script executable
          "chmod +x /tmp/${var.common_tags.component}.sh",
 
-         # Export vault file
+         # 3. Export the path so Ansible automatically finds the password
          "export ANSIBLE_VAULT_PASSWORD_FILE=/tmp/vault_pass.txt",
 
-         # Run script
+         # 4. Run the script with sudo -E to preserve the environment variable
          "sudo -E bash /tmp/${var.common_tags.component}.sh ${var.common_tags.component} ${var.environment} ${var.app_version}"
         
         ]
